@@ -1,3 +1,6 @@
 [tools]
 python = "3.13"
 uv = "latest"
+
+[tasks.install]
+run = "uv sync"
