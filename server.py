@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -15,6 +16,7 @@ USER_EMAIL = os.environ["RAPID7_USER_EMAIL"]
 
 BASE_V1 = f"https://{REGION}.api.insight.rapid7.com/idr/v1"
 BASE_V2 = f"https://{REGION}.api.insight.rapid7.com/idr/v2"
+BASE_LOG_SEARCH = f"https://{REGION}.api.insight.rapid7.com/log_search"
 
 
 def _req(method: str, url: str, body: dict | None = None) -> dict:
@@ -82,7 +84,10 @@ def get_investigation(rrn: str) -> dict:
             "alert_type": a.get("alert_type"),
             "alert_source": a.get("alert_source"),
             "created_time": a.get("created_time"),
-            "detection_rule": a.get("detection_rule_rrn", {}).get("rule_name"),
+            "first_event_time": a.get("first_event_time"),
+            "latest_event_time": a.get("latest_event_time"),
+            "detection_rule_name": (a.get("detection_rule_rrn") or {}).get("rule_name"),
+            "detection_rule_rrn": (a.get("detection_rule_rrn") or {}).get("rule_rrn"),
         }
         for a in alerts_resp.get("data", [])
     ]
@@ -156,6 +161,69 @@ def close_investigation(
         "rrn": result["rrn"],
         "status": result["status"],
         "disposition": result["disposition"],
+    }
+
+
+@mcp.tool()
+def list_log_sets() -> list[dict]:
+    """List available InsightIDR log sets with their contained log IDs. Call this first to discover log set names and IDs before calling query_logs."""
+    result = _req("GET", f"{BASE_LOG_SEARCH}/management/logsets")
+    return [
+        {
+            "id": ls["id"],
+            "name": ls["name"],
+            "log_ids": [log["id"] for log in ls.get("logs_info", [])],
+        }
+        for ls in result.get("logsets", [])
+    ]
+
+
+@mcp.tool()
+def query_logs(
+    log_ids: list[str],
+    leql_statement: str,
+    from_ms: int,
+    to_ms: int,
+    limit: int = 50,
+) -> dict:
+    """
+    Execute a LEQL query against InsightIDR logs and return matching events.
+
+    log_ids: individual log UUIDs from list_log_sets → log_ids (pass all IDs from the relevant log set)
+    leql_statement: LEQL where/calculate clause, e.g. 'where(source_json.EventCode = 4741)'
+    from_ms / to_ms: time window in milliseconds since epoch
+    limit: max events to return (default 50)
+    """
+    body = {
+        "leql": {
+            "during": {"from": from_ms, "to": to_ms},
+            "statement": leql_statement,
+        },
+        "logs": log_ids,
+    }
+    result = _req("POST", f"{BASE_LOG_SEARCH}/query/logs/", body)
+    query_id = result.get("id")
+    if not query_id:
+        raise RuntimeError(f"No query ID in response: {result}")
+
+    for _ in range(30):
+        if result.get("status") not in ("RUNNING", "PROCESSING"):
+            break
+        time.sleep(1)
+        result = _req("GET", f"{BASE_LOG_SEARCH}/query/logs/{query_id}")
+
+    events = (result.get("results") or {}).get("events", [])[:limit]
+    return {
+        "status": result.get("status"),
+        "total_count": (result.get("results") or {}).get("total_count", 0),
+        "events": [
+            {
+                "timestamp": e.get("timestamp"),
+                "message": e.get("message"),
+                "log_name": (e.get("log") or {}).get("name"),
+            }
+            for e in events
+        ],
     }
 
 
