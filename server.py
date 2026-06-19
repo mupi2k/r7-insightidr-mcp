@@ -207,10 +207,10 @@ def query_logs(
         raise RuntimeError(f"No query ID in response: {result}")
 
     for _ in range(30):
-        if result.get("status") not in ("RUNNING", "PROCESSING"):
-            break
         time.sleep(1)
         result = _req("GET", f"{BASE_LOG_SEARCH}/query/logs/{query_id}")
+        if result.get("status") not in ("RUNNING", "PROCESSING"):
+            break
 
     events = (result.get("results") or {}).get("events", [])[:limit]
     return {
