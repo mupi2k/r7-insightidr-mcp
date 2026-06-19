@@ -202,25 +202,30 @@ def query_logs(
         "logs": log_ids,
     }
     result = _req("POST", f"{BASE_LOG_SEARCH}/query/logs/", body)
-    query_id = result.get("id")
-    if not query_id:
-        raise RuntimeError(f"No query ID in response: {result}")
+    poll_url = next(
+        (l["href"] for l in result.get("links", []) if l.get("rel") == "Self"), None
+    )
+    if not poll_url:
+        raise RuntimeError(f"No poll URL in response: {result}")
 
-    for _ in range(30):
-        if result.get("status") not in ("RUNNING", "PROCESSING"):
-            break
+    # API uses progress (0–99 while running, absent when complete)
+    prev_progress = None
+    for _ in range(60):
         time.sleep(1)
-        result = _req("GET", f"{BASE_LOG_SEARCH}/query/logs/{query_id}")
+        result = _req("GET", poll_url)
+        progress = result.get("progress")
+        if progress == 100 or (prev_progress is not None and progress is None):
+            break
+        prev_progress = progress
 
-    events = (result.get("results") or {}).get("events", [])[:limit]
+    events = result.get("events", [])[:limit]
     return {
-        "status": result.get("status"),
-        "total_count": (result.get("results") or {}).get("total_count", 0),
+        "total_count": (result.get("search_stats") or {}).get("events_matched", 0),
         "events": [
             {
                 "timestamp": e.get("timestamp"),
+                "log_id": e.get("log_id"),
                 "message": e.get("message"),
-                "log_name": (e.get("log") or {}).get("name"),
             }
             for e in events
         ],
