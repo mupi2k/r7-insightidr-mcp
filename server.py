@@ -202,21 +202,20 @@ def query_logs(
         "logs": log_ids,
     }
     result = _req("POST", f"{BASE_LOG_SEARCH}/query/logs/", body)
-    poll_url = next(
-        (l["href"] for l in result.get("links", []) if l.get("rel") == "Self"), None
-    )
-    if not poll_url:
-        raise RuntimeError(f"No poll URL in response: {result}")
 
-    # API uses progress (0–99 while running, absent when complete)
-    prev_progress = None
-    for _ in range(60):
-        time.sleep(1)
-        result = _req("GET", poll_url)
-        progress = result.get("progress")
-        if progress == 100 or (prev_progress is not None and progress is None):
-            break
-        prev_progress = progress
+    # progress absent → already complete; only poll if query is still running
+    if result.get("progress") is not None:
+        poll_url = next(
+            (l["href"] for l in result.get("links", []) if l.get("rel") == "Self"), None
+        )
+        if not poll_url:
+            raise RuntimeError(f"No poll URL in response: {result}")
+
+        for _ in range(60):
+            time.sleep(1)
+            result = _req("GET", poll_url)
+            if result.get("progress") is None:
+                break
 
     events = result.get("events", [])[:limit]
     return {
