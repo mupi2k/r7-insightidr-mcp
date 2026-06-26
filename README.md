@@ -40,10 +40,13 @@ Ensure the required environment variables are available in the shell session whe
 |---|---|
 | `list_investigations` | List investigations filtered by assignee (`unassigned`, `me`, `any`) and status |
 | `get_investigation` | Get full details and linked alerts for an investigation by RRN |
+| `get_rule_definition` | Get the full definition of a detection rule by its RRN |
 | `assign_to_me` | Assign an investigation to the configured user |
 | `set_status` | Update investigation status (`OPEN`, `INVESTIGATING`, `WAITING`) |
 | `add_comment` | Add a comment to an investigation |
 | `close_investigation` | Close an investigation with a disposition (`BENIGN`, `MALICIOUS`, `NOT_APPLICABLE`) |
+| `list_log_sets` | List available log sets with their contained log IDs |
+| `query_logs` | Execute a LEQL query against a log set and return matching events |
 
 ## Notes
 

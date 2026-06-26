@@ -1,6 +1,6 @@
 [project]
 name = "r7-insightidr-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server for Rapid7 InsightIDR investigation management"
 requires-python = ">=3.10"
 dependencies = [
