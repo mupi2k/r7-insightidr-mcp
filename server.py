@@ -165,6 +165,13 @@ def close_investigation(
 
 
 @mcp.tool()
+def get_rule_definition(rule_rrn: str) -> dict:
+    """Get the full definition of a detection rule by its RRN."""
+    encoded = _encode_rrn(rule_rrn)
+    return _req("GET", f"{BASE_V1}/rules/{encoded}")
+
+
+@mcp.tool()
 def list_log_sets() -> list[dict]:
     """List available InsightIDR log sets with their contained log IDs. Call this first to discover log set names and IDs before calling query_logs."""
     result = _req("GET", f"{BASE_LOG_SEARCH}/management/logsets")
