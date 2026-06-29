@@ -16,6 +16,7 @@ USER_EMAIL = os.environ["RAPID7_USER_EMAIL"]
 
 BASE_V1 = f"https://{REGION}.api.insight.rapid7.com/idr/v1"
 BASE_V2 = f"https://{REGION}.api.insight.rapid7.com/idr/v2"
+BASE_AT = f"https://{REGION}.api.insight.rapid7.com/idr/at"
 BASE_LOG_SEARCH = f"https://{REGION}.api.insight.rapid7.com/log_search"
 
 
@@ -161,6 +162,57 @@ def close_investigation(
         "rrn": result["rrn"],
         "status": result["status"],
         "disposition": result["disposition"],
+    }
+
+
+@mcp.tool()
+def get_alert_evidences(alert_rrn: str) -> dict:
+    """
+    Fetch the evidence record for an R7 alert (use the alert id from get_investigation alerts[].id).
+
+    For Cortex XDR-sourced investigations this is the primary enrichment path — it returns the
+    Cortex alert ID and full actor/host context directly from the ingested log, bypassing the
+    unreliable name-based Cortex search.
+    """
+    encoded = _encode_rrn(alert_rrn)
+    resp = _req("GET", f"{BASE_AT}/alerts/{encoded}/evidences")
+    evidences = resp.get("evidences", [])
+
+    cortex_alert_ids: list[str] = []
+    actors: list[dict] = []
+
+    for ev in evidences:
+        data_str = ev.get("data") or ""
+        if not data_str:
+            continue
+        try:
+            data = json.loads(data_str)
+        except (ValueError, KeyError):
+            continue
+
+        alert_id = data.get("alert_id")
+        if alert_id:
+            cortex_alert_ids.append(str(alert_id))
+
+        actors.append({
+            "host_name": data.get("host_name") or data.get("asset"),
+            "username": data.get("user_name"),
+            "actor_process_image_name": data.get("actor_process_image_name"),
+            "actor_process_command_line": data.get("actor_process_command_line"),
+            "causality_actor_process_image_name": data.get("causality_actor_process_image_name"),
+            "causality_actor_process_command_line": data.get("causality_actor_process_command_line"),
+            "mitre_tactic": data.get("mitre_tactic_id_and_name"),
+            "mitre_technique": data.get("mitre_technique_id_and_name"),
+            "description": data.get("description"),
+            "category": data.get("category"),
+            "detection_timestamp": data.get("detection_timestamp"),
+            "alert_name": data.get("name"),
+        })
+
+    return {
+        "cortex_alert_ids": cortex_alert_ids,
+        "evidence_count": len(evidences),
+        "actors": actors,
     }
 
 
