@@ -46,7 +46,8 @@ Ensure the required environment variables are available in the shell session whe
 | `add_comment` | Add a comment to an investigation |
 | `close_investigation` | Close an investigation with a disposition (`BENIGN`, `MALICIOUS`, `NOT_APPLICABLE`) |
 | `list_log_sets` | List available log sets with their contained log IDs |
-| `query_logs` | Execute a LEQL query against a log set and return matching events |
+| `query_logs` | Execute a LEQL query against a log set and return matching events (polls up to 60s; `complete: false` means it didn't finish in time) |
+| `check_prevalence` | Check how widespread a process/tool is org-wide (by exe_path substring), grouped by exe_path + username -- use before reaching out to an individual about "unusual" software |
 
 ## Notes
 
