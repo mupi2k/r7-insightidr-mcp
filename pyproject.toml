@@ -1,10 +1,21 @@
 [project]
 name = "r7-insightidr-mcp"
-version = "0.4.0"
+version = "0.4.1"
 description = "MCP server for Rapid7 InsightIDR investigation management"
 requires-python = ">=3.10"
 dependencies = [
     "fastmcp>=3.3.0",
+    # Direct floors on transitive deps (pulled in via fastmcp/mcp) -- each is
+    # a real, confirmed CVE fix, not a routine bump:
+    # anyio: CVE-2026-63374, critical TLS hostname-check bypass via IDNA 2003
+    # encoding, fixed in 4.14.2.
+    "anyio>=4.14.2",
+    # mcp: CVE-2026-52869/52870, session-hijacking via unauthenticated
+    # session-id reuse on SSE/Streamable HTTP transports, fixed in 1.27.2.
+    "mcp>=1.27.2",
+    # python-multipart: CVE-2026-53537/53538/53539/53540, parameter
+    # smuggling + DoS parsing multipart/querystring bodies, fixed in 0.0.31.
+    "python-multipart>=0.0.31",
 ]
 
 [build-system]
