@@ -1,10 +1,14 @@
 [project]
 name = "r7-insightidr-mcp"
-version = "0.4.0"
+version = "0.4.1"
 description = "MCP server for Rapid7 InsightIDR investigation management"
 requires-python = ">=3.10"
 dependencies = [
     "fastmcp>=3.3.0",
+    # Direct floor on a transitive dep (pulled in via fastmcp/httpx/httpcore) --
+    # CVE-2026-63374, a critical TLS hostname-check bypass in anyio's
+    # TLSStream via IDNA 2003 encoding, fixed in 4.14.2.
+    "anyio>=4.14.2",
 ]
 
 [build-system]
