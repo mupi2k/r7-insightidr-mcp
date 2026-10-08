@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/TsvetanG2/mcpward/main/schemas/config.v1.schema.json
+# mcpward configuration. See: https://github.com/TsvetanG2/mcpward
+#
+# checks.errors is deliberately disabled: mcpward expects a JSON-RPC
+# protocol-level error for an unknown tool name or a call missing required
+# arguments. fastmcp (the framework this server is built on) intentionally
+# masks both into an in-band `isError` tool result instead -- confirmed by
+# reading fastmcp's own server.py, not inferred. That's fastmcp's error
+# contract across at least 3.3.1-4.0.11, not a defect in this server, so
+# there's nothing for this project to fix by enabling the check.
+server:
+  transport: stdio
+  command: .venv/bin/python
+  args: ["server.py"]
+  env:
+    RAPID7_API_KEY: "mcpward-ci-placeholder-not-real"
+    RAPID7_USER_EMAIL: "mcpward-ci@example.com"
+
+checks:
+  compliance: true
+  schema: true
+  security: true
+  errors: false
+  drift:
+    baseline: ./mcpward.lock.json
+    fail_on: high
+  collision:
+    enabled: true
+    threshold: 0.8
+  latency:
+    enabled: false
+
+suites: []
