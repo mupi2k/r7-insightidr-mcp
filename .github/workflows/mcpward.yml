@@ -1,0 +1,15 @@
+name: mcpward
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  contract-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: mise run install
+      - run: npx -y mcpward run --config mcpward.yaml

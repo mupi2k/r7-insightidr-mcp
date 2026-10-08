@@ -1,0 +1,368 @@
+{
+  "protocolVersion": "2025-11-25",
+  "capabilities": {
+    "tools": {
+      "listChanged": true
+    },
+    "resources": {
+      "subscribe": false,
+      "listChanged": false
+    },
+    "prompts": {
+      "listChanged": false
+    }
+  },
+  "tools": {
+    "list_investigations": {
+      "descriptionHash": "sha256:77076a2193668e686e46c4987b22dba64d61085cf58d25ad9c633c07dae8e767",
+      "description": "List InsightIDR investigations. Defaults to unassigned open investigations.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "assignee": {
+            "default": "unassigned",
+            "enum": [
+              "unassigned",
+              "me",
+              "any"
+            ],
+            "type": "string"
+          },
+          "size": {
+            "default": 25,
+            "type": "integer"
+          },
+          "status": {
+            "default": "OPEN",
+            "enum": [
+              "OPEN",
+              "INVESTIGATING",
+              "WAITING",
+              "CLOSED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "annotations": null
+    },
+    "get_investigation": {
+      "descriptionHash": "sha256:c62a1e1a665ebbf0754986c0ba14385c006c65e707e9fbc00cfbdb1cafe00b5f",
+      "description": "Get full details and linked alerts for an investigation by RRN.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "rrn": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rrn"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "annotations": null
+    },
+    "set_status": {
+      "descriptionHash": "sha256:60df941f122ed22e197d2089306f3306ae0aa745bd2e9a6e928f4422910a62f7",
+      "description": "Update the status of an open investigation without closing it.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "rrn": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "INVESTIGATING",
+              "WAITING"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "rrn",
+          "status"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "annotations": null
+    },
+    "assign_to_me": {
+      "descriptionHash": "sha256:7d49b916f897cecbc4633098e1e1c69223451ad7561e2e26ecf8dd52f3089bb2",
+      "description": "Assign an investigation to yourself.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "rrn": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rrn"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "annotations": null
+    },
+    "add_comment": {
+      "descriptionHash": "sha256:d5e55a5267318fb93603cf59c4ff3e47b094aa54c7c7c3508e26bde410d463ce",
+      "description": "Add a comment to an investigation.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "rrn": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "rrn"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "annotations": null
+    },
+    "close_investigation": {
+      "descriptionHash": "sha256:bd081f624b96989e49baf53fa3a1ba7646fae3002a4fc9f6b5b27035f68f43d4",
+      "description": "Close an investigation with a disposition.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "disposition": {
+            "enum": [
+              "BENIGN",
+              "MALICIOUS",
+              "NOT_APPLICABLE"
+            ],
+            "type": "string"
+          },
+          "rrn": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "disposition",
+          "rrn"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "annotations": null
+    },
+    "get_alert_evidences": {
+      "descriptionHash": "sha256:e30ec32450a6b8a8185bd2d1502896e7abe64de4157d49ff226db82fb8f3a243",
+      "description": "Fetch the evidence record for an R7 alert (use the alert id from get_investigation alerts[].id).\n\nFor Cortex XDR-sourced investigations this is the primary enrichment path — it returns the\nCortex alert ID and full actor/host context directly from the ingested log, bypassing the\nunreliable name-based Cortex search.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "alert_rrn": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "alert_rrn"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "annotations": null
+    },
+    "get_rule_definition": {
+      "descriptionHash": "sha256:624dd734cab33100a716708afd23b80cc950d4540ab0c345571245b50da4acb3",
+      "description": "Get the full definition of a detection rule by its RRN.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "rule_rrn": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_rrn"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "annotations": null
+    },
+    "list_log_sets": {
+      "descriptionHash": "sha256:d90e5871f10b6bd6527860587cce87df2ef63bc651e69f82a49ad7856db94ffd",
+      "description": "List available InsightIDR log sets with their contained log IDs. Call this first to discover log set names and IDs before calling query_logs.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "annotations": null
+    },
+    "query_logs": {
+      "descriptionHash": "sha256:c8edd02891c8481381373005efd1fe552bdc5578bc2a69b67a93202b346c9937",
+      "description": "Execute a LEQL query against InsightIDR logs and return matching events.\n\nPolls for up to 60 seconds, which comfortably covers a narrow/quick query (e.g. a\nsingle alert's ~30-minute window). Broad-scope queries (many log_ids, wide time\nwindows) or groupby/calculate aggregations can take several minutes and may not\nfinish inside that budget -- check the returned \"complete\" field: if False,\ntotal_count/events reflect a partial, not final, result, and this tool is the\nwrong one for that query (aggregations aren't parsed here at all). Re-running\nwon't help; a query that doesn't finish in 60s needs a purpose-built long-poll\ntool instead.\n\nlog_ids: individual log UUIDs from list_log_sets → log_ids (pass all IDs from the relevant log set)\nleql_statement: LEQL where/calculate clause, e.g. 'where(source_json.EventCode = 4741)'\nfrom_ms / to_ms: time window in milliseconds since epoch\nlimit: max events to return (default 50)",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "from_ms": {
+            "type": "integer"
+          },
+          "leql_statement": {
+            "type": "string"
+          },
+          "limit": {
+            "default": 50,
+            "type": "integer"
+          },
+          "log_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "to_ms": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "from_ms",
+          "leql_statement",
+          "log_ids",
+          "to_ms"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "annotations": null
+    },
+    "check_prevalence": {
+      "descriptionHash": "sha256:7cc3c2f51c969453676a1d616500f689eb06fa11951461de886ef6f2e5106460",
+      "description": "Check how widespread a process/tool is across the org, grouped by exe_path and\nusername. Use this before reaching out to an individual about \"unusual\"\nsoftware -- it may turn out to be long-standing, widespread use rather than a\none-off.\n\nDeliberately avoids LEQL groupby/calculate aggregation: that path scans raw\nevent volume rather than using the indexed search R7 uses for plain where()\nqueries, so it can take many minutes even at modest scope -- and an invalid\nnested field reference in the groupby clause has been observed to silently\nzero out the *entire* result (not just the aggregation) rather than erroring.\nInstead, this runs a fast where() search, walks paginated results, and groups\nclient-side.\n\nStops after max_events matching events to bound runtime -- each page of results\ncosts a few seconds regardless of page size (observed ~6s/page at 50 events per\npage, seemingly real per-page server-side work rather than free pagination), so\nmax_events trades runtime for sample size: the default (250, ~5 pages) finishes\nin well under a minute. If \"truncated\" is true, the tool is in even wider use\nthan the counts reflect -- true counts for a genuinely widespread tool can run\ninto the hundreds of thousands of process starts, since polling/health-check\nsubprocesses can dominate raw invocation counts. Treat group counts as a\nrelative signal (\"N distinct people are using this\"), not an exact total.\n\nexe_path_contains: substring to match against process.exe_path\ndays_back: how many days back to search (default 30)\nlog_ids: specific log IDs to search; omit to search the default endpoint-telemetry\nlog sets (Endpoint Agent, Endpoint Activity, Raw Log)\nmax_events: cap on total matching events fetched before stopping (default 250)",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "days_back": {
+            "default": 30,
+            "type": "integer"
+          },
+          "exe_path_contains": {
+            "type": "string"
+          },
+          "log_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "max_events": {
+            "default": 250,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "exe_path_contains"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "annotations": null
+    }
+  },
+  "meta": {
+    "schemaVersion": 2,
+    "mcpwardVersion": "1.1.1",
+    "canonicalVersion": 2,
+    "capturedAt": "2026-10-08T17:52:13.311Z",
+    "serverName": "Rapid7 InsightIDR",
+    "serverVersion": "3.3.1",
+    "target": {
+      "transport": "stdio",
+      "identity": "/Users/mike.porter/dev/r7-mcp/.venv/bin/python /Users/mike.porter/dev/r7-mcp/server.py"
+    },
+    "authContext": {
+      "kind": "none",
+      "keys": [],
+      "fingerprint": null,
+      "label": null
+    },
+    "environment": {
+      "ci": false,
+      "nodeVersion": "v24.14.0",
+      "platform": "darwin"
+    }
+  }
+}
