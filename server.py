@@ -149,7 +149,7 @@ def add_comment(rrn: str, body: str) -> dict:
 @mcp.tool()
 def close_investigation(
     rrn: str,
-    disposition: Literal["BENIGN", "MALICIOUS", "NOT_APPLICABLE"],
+    disposition: Literal["BENIGN", "MALICIOUS", "SECURITY_TEST", "FALSE_POSITIVE", "UNKNOWN", "NOT_APPLICABLE"],
 ) -> dict:
     """Close an investigation with a disposition."""
     encoded = _encode_rrn(rrn)
