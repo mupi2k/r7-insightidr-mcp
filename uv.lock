@@ -1296,7 +1296,7 @@ wheels = [
 
 [[package]]
 name = "r7-insightidr-mcp"
-version = "0.4.2"
+version = "0.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },

@@ -170,6 +170,9 @@
             "enum": [
               "BENIGN",
               "MALICIOUS",
+              "SECURITY_TEST",
+              "FALSE_POSITIVE",
+              "UNKNOWN",
               "NOT_APPLICABLE"
             ],
             "type": "string"
