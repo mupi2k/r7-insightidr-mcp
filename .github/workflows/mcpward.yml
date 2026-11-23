@@ -12,4 +12,4 @@ jobs:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
       - run: mise run install
-      - run: npx -y mcpward run --config mcpward.yaml
+      - run: mcpward run --config mcpward.yaml
